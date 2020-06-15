@@ -281,5 +281,3 @@ def CascadeLocalTest(testsNumber=100, keyLengthInBytes=1000, testQber=0.05, iter
 	print("correct",correct_keys)
 	print("parity requests in average",round(float(parity_requests)/testsNumber,1))
 	print("total time in average",round(parity_requests/testsNumber*2*testPing*0.001+finish-start,1))
-
-CascadeLocalTest()
