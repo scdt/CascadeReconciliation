@@ -127,7 +127,7 @@ def ShuffleNoRepeats(shuffles_fromFirst, length):
 				shuffle.pop(rnd)
 				break
 			if count>=100:
-				print "count"
+				print("count")
 				break
 	for i in range(length-rnd_stop,length):
 		repeat=False
@@ -166,10 +166,10 @@ def Binary(block, iteration, shuffles_fromPrev):
 		return block.index
 	else:
 		if block.length%2:
-			lh_length=block.length/2+1
-			rh_length=block.length/2
+			lh_length=block.length//2+1
+			rh_length=block.length//2
 		else:
-			lh_length=block.length/2
+			lh_length=block.length//2
 			rh_length=lh_length
 		lh=Block(block.index, lh_length, block.bitArray[:lh_length], -1, iteration)
 		lh_correctParity=AskAliceBlockParity(lh, shuffles_fromPrev)
@@ -188,14 +188,14 @@ def Cascade(fileName, iterations, sock=None, knownQBER=None):
 	if not knownQBER:
 		if sock:
 			sock.sendall(b'Cascade qber estimation')
-			data=sock.recieve(rawKey.length/16+2)
+			data=sock.recieve(rawKey.length//16+2)
 			correctBits=bitarray()
 			correctBits.frombytes(data)
-			correctBits=correctBits[:rawKey.length()/2]
+			correctBits=correctBits[:rawKey.length()//2]
 		else:
-			correctBits=correctKeyFull[:rawKey.length()/2]
+			correctBits=correctKeyFull[:rawKey.length()//2]
 		qber=EstimateQBER(rawKey, correctBits)
-		rawKey=rawKey[rawKey.length()/2:]
+		rawKey=rawKey[rawKey.length()//2:]
 	else:
 		qber=knownQBER
 		if sock:
@@ -246,7 +246,7 @@ def CascadeEffect(shuffles_fromPrev, shuffles_fromFirst, lastIteration, firstErr
 		try:
 			errorBlock=errorBlocks.pop()
 		except Exception:
-			print 'Exception: pop from empty!'
+			print('Exception: pop from empty!')
 		### while added
 		while errorBlock.CalculateBlockParity()==AskAliceBlockParity(errorBlock, shuffles_fromPrev) and errorBlocks:
 			errorBlock=errorBlocks.pop()
@@ -262,13 +262,13 @@ def CascadeLocalTest(testsNumber=100, keyLengthInBytes=1000, testQber=0.05, iter
 	wrong_keys=0
 	global parity_requests
 	parity_requests=0
-	print "Processing tests",testsNumber
-	print "Key length in bits before reconciliation",keyLengthInBytes*8
+	print("Processing tests",testsNumber)
+	print ("Key length in bits before reconciliation",keyLengthInBytes*8)
 	for i in range(testsNumber):
 		global correctKey
 		global correctKeyFull
 		correctKeyFull=RandomBitArray(keyLengthInBytes)
-		correctKey=correctKeyFull[correctKeyFull.length()/2:]
+		correctKey=correctKeyFull[correctKeyFull.length()//2:]
 		rawKey=AddNoise(testQber)
 		start=time.time()
 		siftedKey=Cascade('rawKey', iterationsNumber, None, testQber)
@@ -277,7 +277,9 @@ def CascadeLocalTest(testsNumber=100, keyLengthInBytes=1000, testQber=0.05, iter
 		else:
 			correct_keys+=1
 		finish=time.time()
-	print "wrong",wrong_keys
-	print "correct",correct_keys
-	print "parity requests in average",round(float(parity_requests)/testsNumber,1)
-	print "total time in average",round(parity_requests/testsNumber*2*testPing*0.001+finish-start,1)
+	print("wrong",wrong_keys)
+	print("correct",correct_keys)
+	print("parity requests in average",round(float(parity_requests)/testsNumber,1))
+	print("total time in average",round(parity_requests/testsNumber*2*testPing*0.001+finish-start,1))
+
+CascadeLocalTest()
