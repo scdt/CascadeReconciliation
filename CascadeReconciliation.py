@@ -147,6 +147,23 @@ def ShuffleNoRepeats(shuffles_fromFirst, length):
 		return shuffles
 	return ShuffleNoRepeats(shuffles_fromFirst, length)
 
+def Shift(shuffles_fromFirst, length):
+	shuffle=list(range(length))
+	shuffles=[[],[]]
+	if not shuffles_fromFirst:
+		shuffles[0]=shuffle
+		shuffles[1]=shuffle
+		return shuffles
+	newShuffle=shuffles_fromFirst[-1]
+	newShuffle.insert(0,newShuffle.pop())
+	newShuffle_fromPrev=list(range(length))
+	for i in range(length):
+		newShuffle_fromPrev[newShuffle[i]]=shuffles_fromFirst[-1][i]
+	shuffles[0]=newShuffle
+	shuffles[1]=newShuffle_fromPrev
+	return shuffles
+
+
 def Rearrange(anyKey, shuffle):
 	shuffled=bitarray(anyKey)
 	for i in range(anyKey.length()):
@@ -257,13 +274,15 @@ def CascadeEffect(shuffles_fromPrev, shuffles_fromFirst, lastIteration, firstErr
 		if not errorBlocks:
 			break
 
-def CascadeLocalTest(testsNumber=100, keyLengthInBytes=1000, testQber=0.05, iterationsNumber=4, testPing=0):
+def CascadeLocalTest(testsNumber=100, keyLengthInBytes=100, testQber=0.05, iterationsNumber=4, testPing=0):
 	correct_keys=0
 	wrong_keys=0
 	global parity_requests
 	parity_requests=0
+	errorsSum=0
 	print("Processing tests",testsNumber)
-	print ("Key length in bits before reconciliation",keyLengthInBytes*8)
+	print("Key length in bits before reconciliation",keyLengthInBytes*8)
+	print("QBER",testQber)
 	for i in range(testsNumber):
 		global correctKey
 		global correctKeyFull
@@ -272,12 +291,15 @@ def CascadeLocalTest(testsNumber=100, keyLengthInBytes=1000, testQber=0.05, iter
 		rawKey=AddNoise(testQber)
 		start=time.time()
 		siftedKey=Cascade('rawKey', iterationsNumber, None, testQber)
-		if util.count_xor(siftedKey, correctKey):
+		errors=util.count_xor(siftedKey, correctKey)
+		errorsSum+=errors
+		if errors:
 			wrong_keys+=1
 		else:
 			correct_keys+=1
 		finish=time.time()
 	print("wrong",wrong_keys)
 	print("correct",correct_keys)
+	print("avg ber x10000 ",errorsSum/testsNumber*10000/keyLengthInBytes*8)
 	print("parity requests in average",round(float(parity_requests)/testsNumber,1))
 	print("total time in average",round(parity_requests/testsNumber*2*testPing*0.001+finish-start,1))
